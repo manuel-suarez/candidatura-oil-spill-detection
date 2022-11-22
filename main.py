@@ -366,3 +366,23 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
+
+# Verificación
+test_dataset = Dataset(
+    x_test_dir,
+    y_test_dir,
+    classes=CLASSES,
+    augmentation=get_validation_augmentation(),
+    preprocessing=get_preprocessing(preprocess_input),
+)
+
+test_dataloader = Dataloder(test_dataset, batch_size=1, shuffle=False)
+
+# load best weights
+model.load_weights('best_model.h5')
+
+# Métricas del modelo sobre el conjunto de evaluación
+scores = model.evaluate(test_dataloader)
+print("Loss: {:.5}".format(scores[0]))
+for metric, value in zip(metrics, scores[1:]):
+    print("mean {}: {:.5}".format(metric.__name__, value))
