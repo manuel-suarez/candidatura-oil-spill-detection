@@ -161,3 +161,15 @@ class Dataloder(keras.utils.Sequence):
         """Callback function to shuffle indexes each epoch"""
         if self.shuffle:
             self.indexes = np.random.permutation(self.indexes)
+
+# Lets look at data we have
+#dataset = Dataset(x_train_dir, y_train_dir, classes=['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land'])
+dataset = Dataset(x_train_dir, y_train_dir, classes=['oil_spill', 'sea_surface'])
+
+image, mask = dataset[5] # get some sample
+print(image.shape, mask.shape)
+visualize(
+    image=image,
+    oil_spill=mask[..., 0].squeeze(),
+    background_mask=mask[..., 1].squeeze(),
+)
