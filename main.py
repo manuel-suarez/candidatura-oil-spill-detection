@@ -23,7 +23,7 @@ y_test_dir = os.path.join(DATA_DIR, 'test', 'labels_1D')
 
 # Dataset definition and configuration
 # helper function for data visualization
-def visualize(**images):
+def visualize(figname, **images):
     """PLot images in one row."""
     n = len(images)
     plt.figure(figsize=(16, 5))
@@ -33,7 +33,7 @@ def visualize(**images):
         plt.yticks([])
         plt.title(' '.join(name.split('_')).title())
         plt.imshow(image)
-    plt.show()
+    plt.savefig(figname)
 
 
 # helper function for data visualization
@@ -169,6 +169,7 @@ dataset = Dataset(x_train_dir, y_train_dir, classes=['oil_spill', 'sea_surface']
 image, mask = dataset[5] # get some sample
 print(image.shape, mask.shape)
 visualize(
+    "figura1-visualizacion.png",
     image=image,
     oil_spill=mask[..., 0].squeeze(),
     background_mask=mask[..., 1].squeeze(),
@@ -258,6 +259,7 @@ dataset = Dataset(x_train_dir, y_train_dir, classes=['sea_surface', 'oil_spill']
 image, mask = dataset[12] # get some sample
 print(image.shape, mask.shape)
 visualize(
+    "figura2-aumentacion.png",
     image=image,
     sea_surface=mask[..., 0].squeeze(),
     oil_spill=mask[..., 1].squeeze(),
@@ -365,7 +367,7 @@ plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
+plt.savefig("training_results.png")
 
 # Verificación
 test_dataset = Dataset(
@@ -397,6 +399,7 @@ for i in ids:
     pr_mask = model.predict(image)
 
     visualize(
+        f"resultado{i}.png",
         image=denormalize(image.squeeze()),
         gt_mask=gt_mask.squeeze(),
         pr_mask=pr_mask.squeeze(),
