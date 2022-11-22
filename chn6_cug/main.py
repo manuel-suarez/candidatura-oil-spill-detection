@@ -8,7 +8,7 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 
-DATA_DIR = './CHN6-CUG/'
+DATA_DIR = '/home/est_posgrado_manuel.suarez/data/CHN6-CUG/'
 
 x_train_dir = os.path.join(DATA_DIR, 'train', 'images')
 y_train_dir = os.path.join(DATA_DIR, 'train', 'labels')
