@@ -302,3 +302,35 @@ metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
 
 # compile keras model with defined optimozer, loss and metrics
 model.compile(optim, total_loss, metrics)
+
+# Dataset
+# Dataset for train images
+train_dataset = Dataset(
+    x_train_dir,
+    y_train_dir,
+    classes=CLASSES,
+    augmentation=get_training_augmentation(),
+    preprocessing=get_preprocessing(preprocess_input),
+)
+
+# Dataset for validation images
+valid_dataset = Dataset(
+    x_valid_dir,
+    y_valid_dir,
+    classes=CLASSES,
+    augmentation=get_validation_augmentation(),
+    preprocessing=get_preprocessing(preprocess_input),
+)
+
+train_dataloader = Dataloder(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+valid_dataloader = Dataloder(valid_dataset, batch_size=1, shuffle=False)
+print(train_dataloader[0][0].shape, train_dataloader[0][1].shape)
+# check shapes for errors
+assert train_dataloader[0][0].shape == (BATCH_SIZE, 320, 320, 3)
+assert train_dataloader[0][1].shape == (BATCH_SIZE, 320, 320, n_classes)
+
+# define callbacks for learning rate scheduling and best checkpoints saving
+callbacks = [
+    keras.callbacks.ModelCheckpoint('./best_model.h5', save_weights_only=True, save_best_only=True, mode='min'),
+    keras.callbacks.ReduceLROnPlateau(),
+]
