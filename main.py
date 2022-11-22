@@ -345,3 +345,24 @@ history = model.fit(
     validation_data=valid_dataloader,
     validation_steps=len(valid_dataloader),
 )
+
+# Resultados del entrenamiento
+# Plot training & validation iou_score values
+plt.figure(figsize=(30, 5))
+plt.subplot(121)
+plt.plot(history.history['iou_score'])
+plt.plot(history.history['val_iou_score'])
+plt.title('Model iou_score')
+plt.ylabel('iou_score')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+
+# Plot training & validation loss values
+plt.subplot(122)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
