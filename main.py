@@ -7,3 +7,7 @@ import cv2
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
+
+# Dataset directory
+DATA_DIR = '/home/est_posgrado_manuel.suarez/data/oil-spill-dataset'
+
