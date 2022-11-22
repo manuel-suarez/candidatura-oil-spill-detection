@@ -334,3 +334,14 @@ callbacks = [
     keras.callbacks.ModelCheckpoint('./best_model.h5', save_weights_only=True, save_best_only=True, mode='min'),
     keras.callbacks.ReduceLROnPlateau(),
 ]
+
+# Training
+# train model
+history = model.fit(
+    train_dataloader,
+    steps_per_epoch=len(train_dataloader),
+    epochs=EPOCHS,
+    callbacks=callbacks,
+    validation_data=valid_dataloader,
+    validation_steps=len(valid_dataloader),
+)
