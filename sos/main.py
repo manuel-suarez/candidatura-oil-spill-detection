@@ -8,16 +8,16 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 
-DATA_DIR = './CHN6-CUG/'
+DATA_DIR = '/home/est_posgrado_manuel.suarez/data/SOS_dataset/'
 
-x_train_dir = os.path.join(DATA_DIR, 'train', 'images')
-y_train_dir = os.path.join(DATA_DIR, 'train', 'labels')
+x_train_dir = os.path.join(DATA_DIR, 'train', 'sentinel', 'images')
+y_train_dir = os.path.join(DATA_DIR, 'train', 'sentinel', 'labels')
 
-x_valid_dir = os.path.join(DATA_DIR, 'val', 'images')
-y_valid_dir = os.path.join(DATA_DIR, 'val', 'labels')
+x_valid_dir = os.path.join(DATA_DIR, 'val', 'sentinel', 'images')
+y_valid_dir = os.path.join(DATA_DIR, 'val', 'sentinel', 'labels')
 
-x_test_dir = os.path.join(DATA_DIR, 'test', 'images')
-y_test_dir = os.path.join(DATA_DIR, 'test', 'labels')
+x_test_dir = os.path.join(DATA_DIR, 'test', 'sentinel', 'images')
+y_test_dir = os.path.join(DATA_DIR, 'test', 'sentinel', 'labels')
 
 
 # helper function for data visualization
@@ -64,7 +64,7 @@ class Dataset:
         4 - Land
     """
 
-    CLASSES = ['background', 'road']
+    CLASSES = ['sea_surface', 'oil_spill']
 
     def __init__(
             self,
@@ -165,7 +165,7 @@ class Dataloder(keras.utils.Sequence):
 
 
 # dataset = Dataset(x_train_dir, y_train_dir, classes=['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land'])
-dataset = Dataset(x_train_dir, y_train_dir, classes=['background', 'road'])
+dataset = Dataset(x_train_dir, y_train_dir, classes=['sea_surface', 'oil_spill'])
 
 image, mask = dataset[5]  # get some sample
 print(image.shape, mask.shape)
@@ -254,7 +254,7 @@ def get_preprocessing(preprocessing_fn):
 
 # Lets look at augmented data we have
 # dataset = Dataset(x_train_dir, y_train_dir, classes=['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land'], augmentation=get_training_augmentation())
-dataset = Dataset(x_train_dir, y_train_dir, classes=['background', 'road'], augmentation=get_training_augmentation())
+dataset = Dataset(x_train_dir, y_train_dir, classes=['sea_surface', 'oil_spill'], augmentation=get_training_augmentation())
 
 image, mask = dataset[12]  # get some sample
 print(image.shape, mask.shape)
@@ -274,7 +274,7 @@ sm.set_framework('tf.keras')
 BACKBONE = 'efficientnetb3'
 BATCH_SIZE = 8
 # CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
-CLASSES = ['road']
+CLASSES = ['oil_spill']
 LR = 0.0001
 EPOCHS = 200
 
