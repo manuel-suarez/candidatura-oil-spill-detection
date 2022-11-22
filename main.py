@@ -272,135 +272,155 @@ sm.set_framework('tf.keras')
 # segmentation_models could also use `tf.keras` if you do not have Keras installed
 # or you could switch to other framework using `sm.set_framework('tf.keras')`
 
-BACKBONE = 'efficientnetb3'
+BACKBONES = [
+        # VGG
+        'vgg16','vgg19',
+        # ResNets
+        'resnet18','resnet34','resnet50','resnet101','resnet152',
+        # ResNeXt
+        'resnext50','resnext101',
+        # Inception
+        'inceptionv3','inceptionresnetv2',
+        # DenseNet
+        'densenet121','densenet169','densenet201',
+        # SE models
+        'seresnet18','seresnet34','seresnet50','seresnet101','seresnet152','seresnext50','seresnext101','senet154',
+        # Mobile Nets
+        'mobilenet','mobilenetv2',
+        # EfficientNets
+        'efficientnetb0','efficientnetb1','efficientnetb2','efficientnetb3','efficientnetb4','efficientnetb5','efficientnetb6','efficientnetb7',
+    ]
 BATCH_SIZE = 8
 #CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
 CLASSES = ['oil_spill']
 LR = 0.0001
-EPOCHS = 100
+EPOCHS = 20
+for BACKBONE in BACKBONES:
+    print(80*"=")
+    print(BACKBONE)
+    print(80*"=")
+    preprocess_input = sm.get_preprocessing(BACKBONE)
 
-preprocess_input = sm.get_preprocessing(BACKBONE)
+    # define network parameters
+    n_classes = 1 if len(CLASSES) == 1 else (len(CLASSES) + 1)  # case for binary and multiclass segmentation
+    activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
-# define network parameters
-n_classes = 1 if len(CLASSES) == 1 else (len(CLASSES) + 1)  # case for binary and multiclass segmentation
-activation = 'sigmoid' if n_classes == 1 else 'softmax'
+    #create model
+    model = sm.Unet(BACKBONE, classes=n_classes, activation=activation)
 
-#create model
-model = sm.Unet(BACKBONE, classes=n_classes, activation=activation)
+    # define optomizer
+    optim = keras.optimizers.Adam(LR)
 
-# define optomizer
-optim = keras.optimizers.Adam(LR)
+    # Segmentation models losses can be combined together by '+' and scaled by integer or float factor
+    # set class weights for dice_loss (car: 1.; pedestrian: 2.; background: 0.5;)
+    dice_loss = sm.losses.DiceLoss(class_weights=np.array([1, 2, 0.5]))
+    focal_loss = sm.losses.BinaryFocalLoss() if n_classes == 1 else sm.losses.CategoricalFocalLoss()
+    total_loss = dice_loss + (1 * focal_loss)
 
-# Segmentation models losses can be combined together by '+' and scaled by integer or float factor
-# set class weights for dice_loss (car: 1.; pedestrian: 2.; background: 0.5;)
-dice_loss = sm.losses.DiceLoss(class_weights=np.array([1, 2, 0.5]))
-focal_loss = sm.losses.BinaryFocalLoss() if n_classes == 1 else sm.losses.CategoricalFocalLoss()
-total_loss = dice_loss + (1 * focal_loss)
+    # actulally total_loss can be imported directly from library, above example just show you how to manipulate with losses
+    # total_loss = sm.losses.binary_focal_dice_loss # or sm.losses.categorical_focal_dice_loss
 
-# actulally total_loss can be imported directly from library, above example just show you how to manipulate with losses
-# total_loss = sm.losses.binary_focal_dice_loss # or sm.losses.categorical_focal_dice_loss
+    metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
 
-metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
+    # compile keras model with defined optimozer, loss and metrics
+    model.compile(optim, total_loss, metrics)
 
-# compile keras model with defined optimozer, loss and metrics
-model.compile(optim, total_loss, metrics)
-
-# Dataset
-# Dataset for train images
-train_dataset = Dataset(
-    x_train_dir,
-    y_train_dir,
-    classes=CLASSES,
-    augmentation=get_training_augmentation(),
-    preprocessing=get_preprocessing(preprocess_input),
-)
-
-# Dataset for validation images
-valid_dataset = Dataset(
-    x_valid_dir,
-    y_valid_dir,
-    classes=CLASSES,
-    augmentation=get_validation_augmentation(),
-    preprocessing=get_preprocessing(preprocess_input),
-)
-
-train_dataloader = Dataloder(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-valid_dataloader = Dataloder(valid_dataset, batch_size=1, shuffle=False)
-print(train_dataloader[0][0].shape, train_dataloader[0][1].shape)
-# check shapes for errors
-assert train_dataloader[0][0].shape == (BATCH_SIZE, 320, 320, 3)
-assert train_dataloader[0][1].shape == (BATCH_SIZE, 320, 320, n_classes)
-
-# define callbacks for learning rate scheduling and best checkpoints saving
-callbacks = [
-    keras.callbacks.ModelCheckpoint('./best_model.h5', save_weights_only=True, save_best_only=True, mode='min'),
-    keras.callbacks.ReduceLROnPlateau(),
-]
-
-# Training
-# train model
-history = model.fit(
-    train_dataloader,
-    steps_per_epoch=len(train_dataloader),
-    epochs=EPOCHS,
-    callbacks=callbacks,
-    validation_data=valid_dataloader,
-    validation_steps=len(valid_dataloader),
-)
-
-# Resultados del entrenamiento
-# Plot training & validation iou_score values
-plt.figure(figsize=(30, 5))
-plt.subplot(121)
-plt.plot(history.history['iou_score'])
-plt.plot(history.history['val_iou_score'])
-plt.title('Model iou_score')
-plt.ylabel('iou_score')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-
-# Plot training & validation loss values
-plt.subplot(122)
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('Model loss')
-plt.ylabel('Loss')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.savefig("training_results.png")
-
-# Verificación
-test_dataset = Dataset(
-    x_test_dir,
-    y_test_dir,
-    classes=CLASSES,
-    augmentation=get_validation_augmentation(),
-    preprocessing=get_preprocessing(preprocess_input),
-)
-
-test_dataloader = Dataloder(test_dataset, batch_size=1, shuffle=False)
-
-# load best weights
-model.load_weights('best_model.h5')
-
-# Métricas del modelo sobre el conjunto de evaluación
-scores = model.evaluate(test_dataloader)
-print("Loss: {:.5}".format(scores[0]))
-for metric, value in zip(metrics, scores[1:]):
-    print("mean {}: {:.5}".format(metric.__name__, value))
-
-# Resultados visuales sobre el conjunto de entrenamiento
-n = 5
-ids = np.random.choice(np.arange(len(test_dataset)), size=n)
-
-for i in ids:
-    image, gt_mask = test_dataset[i]
-    image = np.expand_dims(image, axis=0)
-    pr_mask = model.predict(image)
-
-    visualize(
-        f"resultado{i}.png",
-        image=denormalize(image.squeeze()),
-        gt_mask=gt_mask.squeeze(),
-        pr_mask=pr_mask.squeeze(),
+    # Dataset
+    # Dataset for train images
+    train_dataset = Dataset(
+        x_train_dir,
+        y_train_dir,
+        classes=CLASSES,
+        augmentation=get_training_augmentation(),
+        preprocessing=get_preprocessing(preprocess_input),
     )
+
+    # Dataset for validation images
+    valid_dataset = Dataset(
+        x_valid_dir,
+        y_valid_dir,
+        classes=CLASSES,
+        augmentation=get_validation_augmentation(),
+        preprocessing=get_preprocessing(preprocess_input),
+    )
+
+    train_dataloader = Dataloder(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    valid_dataloader = Dataloder(valid_dataset, batch_size=1, shuffle=False)
+    print(train_dataloader[0][0].shape, train_dataloader[0][1].shape)
+    # check shapes for errors
+    assert train_dataloader[0][0].shape == (BATCH_SIZE, 320, 320, 3)
+    assert train_dataloader[0][1].shape == (BATCH_SIZE, 320, 320, n_classes)
+
+    # define callbacks for learning rate scheduling and best checkpoints saving
+    callbacks = [
+        keras.callbacks.ModelCheckpoint(f"{BACKBONE}_best_model.h5", save_weights_only=True, save_best_only=True, mode='min'),
+        keras.callbacks.ReduceLROnPlateau(),
+    ]
+
+    # Training
+    # train model
+    history = model.fit(
+        train_dataloader,
+        steps_per_epoch=len(train_dataloader),
+        epochs=EPOCHS,
+        callbacks=callbacks,
+        validation_data=valid_dataloader,
+        validation_steps=len(valid_dataloader),
+    )
+
+    # Resultados del entrenamiento
+    # Plot training & validation iou_score values
+    plt.figure(figsize=(30, 5))
+    plt.subplot(121)
+    plt.plot(history.history['iou_score'])
+    plt.plot(history.history['val_iou_score'])
+    plt.title('Model iou_score')
+    plt.ylabel('iou_score')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+
+    # Plot training & validation loss values
+    plt.subplot(122)
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.savefig(f"{BACKBONE}_training_results.png")
+
+    # Verificación
+    test_dataset = Dataset(
+        x_test_dir,
+        y_test_dir,
+        classes=CLASSES,
+        augmentation=get_validation_augmentation(),
+        preprocessing=get_preprocessing(preprocess_input),
+    )
+
+    test_dataloader = Dataloder(test_dataset, batch_size=1, shuffle=False)
+
+    # load best weights
+    model.load_weights(f"{BACKBONE}_best_model.h5")
+
+    # Métricas del modelo sobre el conjunto de evaluación
+    scores = model.evaluate(test_dataloader)
+    print("Backbone: {} Loss: {:.5}".format(BACKBONE, scores[0]))
+    for metric, value in zip(metrics, scores[1:]):
+        print("Backbone: {} mean {}: {:.5}".format(BACKBONE, metric.__name__, value))
+
+    # Resultados visuales sobre el conjunto de entrenamiento
+    n = 5
+    ids = np.random.choice(np.arange(len(test_dataset)), size=n)
+
+    for i in ids:
+        image, gt_mask = test_dataset[i]
+        image = np.expand_dims(image, axis=0)
+        pr_mask = model.predict(image)
+
+        visualize(
+            f"{BACKBONE}_resultado{i}.png",
+            image=denormalize(image.squeeze()),
+            gt_mask=gt_mask.squeeze(),
+            pr_mask=pr_mask.squeeze(),
+        )
