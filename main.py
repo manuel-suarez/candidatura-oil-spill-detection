@@ -263,3 +263,25 @@ visualize(
     oil_spill=mask[..., 1].squeeze(),
     background_mask=mask[..., 2].squeeze(),
 )
+
+# Modelo de segmentación
+import segmentation_models as sm
+sm.set_framework('tf.keras')
+# segmentation_models could also use `tf.keras` if you do not have Keras installed
+# or you could switch to other framework using `sm.set_framework('tf.keras')`
+
+BACKBONE = 'efficientnetb3'
+BATCH_SIZE = 8
+#CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
+CLASSES = ['oil_spill']
+LR = 0.0001
+EPOCHS = 100
+
+preprocess_input = sm.get_preprocessing(BACKBONE)
+
+# define network parameters
+n_classes = 1 if len(CLASSES) == 1 else (len(CLASSES) + 1)  # case for binary and multiclass segmentation
+activation = 'sigmoid' if n_classes == 1 else 'softmax'
+
+#create model
+model = sm.Unet(BACKBONE, classes=n_classes, activation=activation)
