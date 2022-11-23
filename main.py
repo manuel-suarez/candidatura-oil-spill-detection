@@ -91,10 +91,10 @@ class Dataset:
         # read data
         image = cv2.imread(self.images_fps[i])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = cv2.resize(image, (224, 224))
+        image = cv2.resize(image, (480, 360))
         # image = np.array(Image.open(self.images_fps[i]).resize((480, 360)))
         mask = cv2.imread(self.masks_fps[i], cv2.IMREAD_GRAYSCALE)
-        mask = cv2.resize(mask, (224, 224))
+        mask = cv2.resize(mask, (480, 360))
         # mask = np.array(Image.open(self.masks_fps[i]).convert('L').resize((480, 360)))
 
         # extract certain classes from mask (e.g. cars)
@@ -191,8 +191,8 @@ def get_training_augmentation():
 
         A.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
 
-        A.PadIfNeeded(min_height=224, min_width=224, always_apply=True, border_mode=0),
-        A.RandomCrop(height=224, width=224, always_apply=True),
+        A.PadIfNeeded(min_height=320, min_width=320, always_apply=True, border_mode=0),
+        A.RandomCrop(height=320, width=320, always_apply=True),
 
         A.IAAAdditiveGaussianNoise(p=0.2),
         A.IAAPerspective(p=0.5),
@@ -230,7 +230,7 @@ def get_training_augmentation():
 def get_validation_augmentation():
     """Add paddings to make image shape divisible by 32"""
     test_transform = [
-        A.PadIfNeeded(224, 224)
+        A.PadIfNeeded(384, 480)
     ]
     return A.Compose(test_transform)
 
@@ -306,7 +306,7 @@ for BACKBONE in BACKBONES:
     activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
     #create model
-    model = sm.PSPNet(BACKBONE, classes=n_classes, activation=activation)
+    model = sm.Linknet(BACKBONE, classes=n_classes, activation=activation)
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
@@ -348,8 +348,8 @@ for BACKBONE in BACKBONES:
     valid_dataloader = Dataloder(valid_dataset, batch_size=1, shuffle=False)
     print(train_dataloader[0][0].shape, train_dataloader[0][1].shape)
     # check shapes for errors
-    assert train_dataloader[0][0].shape == (BATCH_SIZE, 224, 224, 3)
-    assert train_dataloader[0][1].shape == (BATCH_SIZE, 224, 224, n_classes)
+    assert train_dataloader[0][0].shape == (BATCH_SIZE, 320, 320, 3)
+    assert train_dataloader[0][1].shape == (BATCH_SIZE, 320, 320, n_classes)
 
     # define callbacks for learning rate scheduling and best checkpoints saving
     callbacks = [
