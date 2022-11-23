@@ -276,19 +276,19 @@ BACKBONES = [
         # VGG
         'vgg16','vgg19',
         # ResNets
-        'resnet18','resnet34',#'resnet50',#'resnet101','resnet152',
+        'resnet18',#'resnet34',#'resnet50',#'resnet101','resnet152',
         # ResNeXt
-        'resnext50','resnext101',
+        'resnext50',#'resnext101',
         # Inception
-        'inceptionv3','inceptionresnetv2',
+        'inceptionv3',#'inceptionresnetv2',
         # DenseNet
-        'densenet121','densenet169',#'densenet201',
+        'densenet121',#'densenet169',#'densenet201',
         # SE models
-        'seresnet18','seresnet34',#'seresnet50',#'seresnet101','seresnet152','seresnext50','seresnext101','senet154',
+        'seresnet18',#'seresnet34',#'seresnet50',#'seresnet101','seresnet152','seresnext50','seresnext101','senet154',
         # Mobile Nets
         'mobilenet','mobilenetv2',
         # EfficientNets
-        'efficientnetb0','efficientnetb1','efficientnetb2','efficientnetb3',#'efficientnetb4','efficientnetb5','efficientnetb6','efficientnetb7',
+        'efficientnetb0','efficientnetb1',#'efficientnetb2','efficientnetb3',#'efficientnetb4','efficientnetb5','efficientnetb6','efficientnetb7',
     ]
 BATCH_SIZE = 8
 #CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
