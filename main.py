@@ -306,7 +306,7 @@ for BACKBONE in BACKBONES:
     activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
     #create model
-    model = sm.PSPNet(BACKBONE, classes=n_classes, activation=activation)
+    model = sm.PSPNet(BACKBONE, classes=n_classes, activation=activation, pyramid_aggregation="sum")
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
