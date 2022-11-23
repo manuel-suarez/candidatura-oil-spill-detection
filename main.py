@@ -307,7 +307,6 @@ for BACKBONE in BACKBONES:
 
     #create model
     model = sm.FPN(BACKBONE, classes=n_classes, activation=activation)
-    continue
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
