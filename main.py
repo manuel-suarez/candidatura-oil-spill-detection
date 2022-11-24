@@ -191,8 +191,8 @@ def get_training_augmentation():
 
         A.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
 
-        A.PadIfNeeded(min_height=320, min_width=320, always_apply=True, border_mode=0),
-        A.RandomCrop(height=320, width=320, always_apply=True),
+        A.PadIfNeeded(min_height=288, min_width=288, always_apply=True, border_mode=0),
+        A.RandomCrop(height=288, width=288, always_apply=True),
 
         A.IAAAdditiveGaussianNoise(p=0.2),
         A.IAAPerspective(p=0.5),
@@ -230,7 +230,7 @@ def get_training_augmentation():
 def get_validation_augmentation():
     """Add paddings to make image shape divisible by 32"""
     test_transform = [
-        A.PadIfNeeded(384, 480)
+        A.PadIfNeeded(288, 288)
     ]
     return A.Compose(test_transform)
 
@@ -306,7 +306,7 @@ for BACKBONE in BACKBONES:
     activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
     #create model
-    model = sm.PSPNet(BACKBONE, classes=n_classes, activation=activation, pyramid_aggregation="sum")
+    model = sm.PSPNet(BACKBONE, classes=n_classes, activation=activation, )
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
@@ -348,8 +348,8 @@ for BACKBONE in BACKBONES:
     valid_dataloader = Dataloder(valid_dataset, batch_size=1, shuffle=False)
     print(train_dataloader[0][0].shape, train_dataloader[0][1].shape)
     # check shapes for errors
-    assert train_dataloader[0][0].shape == (BATCH_SIZE, 320, 320, 3)
-    assert train_dataloader[0][1].shape == (BATCH_SIZE, 320, 320, n_classes)
+    assert train_dataloader[0][0].shape == (BATCH_SIZE, 288, 288, 3)
+    assert train_dataloader[0][1].shape == (BATCH_SIZE, 288, 288, n_classes)
 
     # define callbacks for learning rate scheduling and best checkpoints saving
     callbacks = [
