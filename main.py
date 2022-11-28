@@ -306,7 +306,7 @@ for BACKBONE in BACKBONES:
     activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
     #create model
-    model = sm.Linknet(BACKBONE, classes=n_classes, activation=activation, )
+    model = sm.FPN(BACKBONE, classes=n_classes, activation=activation, )
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
