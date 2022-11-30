@@ -294,7 +294,7 @@ BATCH_SIZE = 8
 #CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
 CLASSES = ['oil_spill']
 LR = 0.0001
-EPOCHS = 50
+EPOCHS = 100
 for BACKBONE in BACKBONES:
     print(80*"=")
     print(BACKBONE)
@@ -306,7 +306,7 @@ for BACKBONE in BACKBONES:
     activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
     #create model
-    model = sm.FPN(BACKBONE, classes=n_classes, activation=activation, )
+    model = sm.Linknet(BACKBONE, classes=n_classes, activation=activation, )
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
