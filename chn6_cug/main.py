@@ -276,7 +276,7 @@ BATCH_SIZE = 8
 # CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
 CLASSES = ['road']
 LR = 0.0001
-EPOCHS = 30
+EPOCHS = 50
 
 preprocess_input = sm.get_preprocessing(BACKBONE)
 
