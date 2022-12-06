@@ -7,6 +7,7 @@ import cv2
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
+from schedulers import SGDRScheduler
 
 # Dataset directory
 DATA_DIR = '/home/est_posgrado_manuel.suarez/data/oil-spill-dataset'
@@ -276,15 +277,15 @@ BACKBONES = [
         # VGG
         'vgg16','vgg19',
         # ResNets
-        'resnet18','resnet34','resnet50',#'resnet101','resnet152',
+        'resnet18',#'resnet34',#'resnet50',#'resnet101','resnet152',
         # ResNeXt
-        'resnext50','resnext101',
+        'resnext50',#'resnext101',
         # Inception
-        'inceptionv3','inceptionresnetv2',
+        'inceptionv3',#'inceptionresnetv2',
         # DenseNet
-        'densenet121','densenet169','densenet201',
+        'densenet121',#'densenet169','densenet201',
         # SE models
-        'seresnet18','seresnet34','seresnet50',#'seresnet101','seresnet152','seresnext50','seresnext101','senet154',
+        'seresnet18',#'seresnet34','seresnet50',#'seresnet101','seresnet152','seresnext50','seresnext101','senet154',
         # Mobile Nets
         'mobilenet','mobilenetv2',
         # EfficientNets
@@ -294,7 +295,7 @@ BATCH_SIZE = 8
 #CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
 CLASSES = ['oil_spill']
 LR = 0.0001
-EPOCHS = 100
+EPOCHS = 50
 for BACKBONE in BACKBONES:
     print(80*"=")
     print(BACKBONE)
@@ -306,10 +307,13 @@ for BACKBONE in BACKBONES:
     activation = 'sigmoid' if n_classes == 1 else 'softmax'
 
     #create model
-    model = sm.Linknet(BACKBONE, classes=n_classes, activation=activation, )
+    model = sm.Unet(BACKBONE, classes=n_classes, activation=activation, )
 
     # define optomizer
     optim = keras.optimizers.Adam(LR)
+
+    # define scheduler
+    schedule = SGDRScheduler(min_lr=1e-5, max_lr=1e-3, steps_per_epoch=20, lr_decay=0.5)
 
     # Segmentation models losses can be combined together by '+' and scaled by integer or float factor
     # set class weights for dice_loss (car: 1.; pedestrian: 2.; background: 0.5;)
@@ -355,6 +359,7 @@ for BACKBONE in BACKBONES:
     callbacks = [
         keras.callbacks.ModelCheckpoint(f"{BACKBONE}_best_model.h5", save_weights_only=True, save_best_only=True, mode='min'),
         keras.callbacks.ReduceLROnPlateau(),
+        schedule
     ]
 
     # Training
