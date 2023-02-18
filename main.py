@@ -293,7 +293,7 @@ BACKBONES = [
     ]
 BATCH_SIZE = 8
 #CLASSES = ['sea_surface', 'oil_spill', 'look_alike', 'ship', 'land']
-CLASSES = ['oil_spill']
+CLASSES = ['look_alike']
 LR = 0.0001
 EPOCHS = 50
 for BACKBONE in BACKBONES:
